@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 import Navigate from "../Navigate";
 import Prices from "../Prices";
@@ -6,13 +7,12 @@ import Header from "../Header";
 import Container from "../Container";
 import finalPageHOC from "./finalPageHOC";
 
-import RenderService from "./RenderService";
-import RenderTypeAuto from "./RenderTypeAuto";
+import Service from "./Service";
+import TypeAuto from "./TypeAuto";
 import OrderElement from "./OrderElement";
 
 import StretchContainer from "../StretchContainer";
 
-import { boxesFetch, selectBox } from "actions/create/Boxes";
 import { obj } from "./obj";
 
 import block from "bem-cn";
@@ -23,13 +23,13 @@ export function CreateFinalPage({
   selectedBox,
   selectedWasher,
   selectedServices,
-  deleteService,
-  change_place,
-  prices,
+  changePlace,
+  summ,
+  sale,
   typeAuto,
-  num_auto,
-  select_action,
-  client_type,
+  numAuto,
+  selectedAction,
+  clientType,
   payType = "fiz",
   phoneNum,
   setPayCart,
@@ -41,35 +41,32 @@ export function CreateFinalPage({
       <Header
         text={
           orderType === "edit"
-            ? `Редактирование заказа ${num_auto}.`
+            ? `Редактирование заказа ${numAuto}.`
             : "Пожтверждение заказа."
         }
       />
-      <div className={b("services-wrapper")}>
-        <OrderElement {...{ obj: obj.numAuto(num_auto), change_place }} />
-        <OrderElement {...{ obj: obj.phoneNum(phoneNum), change_place }} />
-        {client_type === "org" ? (
-          <OrderElement {...{ obj: obj.payType(payType), change_place }} />
+      <div className={b("services-wrapper")()}>
+        <OrderElement {...obj.numAuto(numAuto)} {...{ changePlace }} />
+        <OrderElement {...obj.phoneNum(phoneNum)} {...{ changePlace }} />
+        {clientType === "org" ? (
+          <OrderElement {...obj.payType(payType)} {...{ changePlace }} />
         ) : null}
-        <RenderTypeAuto {...{ typeAuto, change_place }} />
-        <OrderElement {...{ obj: obj.box(selectedBox), change_place }} />
-        <OrderElement {...{ obj: obj.washer(selectedWasher), change_place }} />
+        <TypeAuto {...{ typeAuto, changePlace }} />
+        <OrderElement {...obj.box(selectedBox)} {...{ changePlace }} />
+        <OrderElement {...obj.washer(selectedWasher)} {...{ changePlace }} />
       </div>
       <StretchContainer>
-        <div className={b("services-wrapper")}>
+        <div className={b("services-wrapper")()}>
           {!selectedServices.length ? (
             <button
-              onClick={() => change_place("/selectservices")}
-              className={b("button", { toservices: true, green: true })}
+              onClick={() => changePlace("/selectservices")}
+              className={b("button", { toservices: true, green: true })()}
             >
               Выбрать услуги
             </button>
           ) : (
             selectedServices.map(item => (
-              <RenderService
-                key={item.id}
-                {...{ item, change_place, typeAuto }}
-              />
+              <Service key={item.id} {...item} {...{ changePlace, typeAuto }} />
             ))
           )}
         </div>
@@ -81,15 +78,51 @@ export function CreateFinalPage({
             pay: true,
             green: !payed,
             selected: payed
-          })}
+          })()}
         >
           Оплата безнал
         </button>
       )}
       <Navigate>
-        <Prices prices={prices} />
+        <Prices {...{ summ, sale }} />
       </Navigate>
     </Container>
   );
 }
+CreateFinalPage.propTypes = {
+  numAuto: PropTypes.string,
+  selectedAction: PropTypes.string,
+  clientType: PropTypes.string,
+  phoneNum: PropTypes.string,
+  payed: PropTypes.string,
+  orderType: PropTypes.string,
+  selectedWasher: PropTypes.string,
+
+  typeAuto: PropTypes.number,
+  selectedBox: PropTypes.number,
+  summ: PropTypes.number,
+  sale: PropTypes.number,
+
+  payType: PropTypes.shape({
+    id: PropTypes.string,
+    name: PropTypes.string,
+    selected: PropTypes.bool
+  }),
+  selectedServices: PropTypes.arrayOf(
+    PropTypes.shape({
+      groupPercent: PropTypes.number,
+      id: PropTypes.number,
+      max: PropTypes.number,
+      multiple: PropTypes.bool,
+      name: PropTypes.string,
+      orgPrice: PropTypes.array,
+      percent: PropTypes.number,
+      price: PropTypes.array,
+      quantity: PropTypes.number
+    })
+  ),
+
+  setPayCart: PropTypes.func.isRequired,
+  changePlace: PropTypes.func.isRequired
+};
 export default finalPageHOC(CreateFinalPage);

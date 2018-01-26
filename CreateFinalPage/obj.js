@@ -1,9 +1,9 @@
 export const obj = {
-  numAuto: num_auto => ({
-    type: num_auto,
+  numAuto: numAuto => ({
+    type: numAuto,
     to: "/neworder",
     emptyText: "Номер авто",
-    text: num_auto,
+    text: numAuto,
     classname: "num"
   }),
   phoneNum: phoneNum => ({

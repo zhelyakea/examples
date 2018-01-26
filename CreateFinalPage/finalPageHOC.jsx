@@ -1,72 +1,71 @@
-import React, { Component } from "react";
+import React from "react";
 import { connect } from "react-redux";
-import { hashHistory } from "react-router";
-
-import { change_place } from "actions/DataAction";
-import { getEditOrder } from "actions/create/EditOrder";
-import { setPayCart } from "actions/create/PayCart";
-
+import history from "services/history";
+import { compose, lifecycle, withState, withHandlers } from "recompose";
+import { changePlace, getEditOrder } from "actions";
+import { setPayCart } from "reducers/payed";
 import { getSelectedServices, getSelectedPayType } from "reducers";
 
-const mapStateToProps = ({
+const mapState = ({
   boxes: { selected: selectedBox },
   washers: { selected, list },
   services,
-  prices,
+  prices: { summ, sale },
   typeAuto,
   selected_order,
-  select_action,
-  num_auto,
+  selectedAction,
+  numAuto,
   pay_types,
   phoneNum,
-  client_type,
+  clientType,
   payed
 }) => ({
   selectedBox,
   selectedWasher: list[selected],
   selectedServices: getSelectedServices(services),
-  prices,
+  summ,
+  sale,
   typeAuto,
   selected_order,
-  select_action,
-  num_auto,
+  selectedAction,
+  numAuto,
   payType: getSelectedPayType(pay_types),
-  client_type,
+  clientType,
   phoneNum,
   payed
 });
-const mapDispatchToProps = {
-  change_place,
+const mapDispatch = {
+  changePlace,
   getEditOrder,
   setPayCart
 };
-const finalPageHOC = WrapedComponent => {
-  class AsyncComponent extends Component {
-    state = {
-      orderType: null
-    };
-    componentWillMount() {
-      const {
-        num_auto,
-        selected_order,
-        select_action,
-        getEditOrder
-      } = this.props;
 
-      if (select_action !== "3" && !num_auto.length) hashHistory.push("/");
-      else if (select_action === "3") {
-        getEditOrder(`getorderedit=${selected_order}&`);
-        this.setState({
-          orderType: "edit"
-        });
+const finalPageHOC = FinalPage =>
+  compose(
+    connect(mapState, mapDispatch),
+    withState("orderType", "setOrderType", null),
+    withHandlers({
+      changeOrderType: ({ orderType, setOrderType }) => type => {
+        setOrderType(orderType => type);
       }
-    }
-    render() {
-      const { orderType } = this.state;
-      const newProps = { orderType };
-      return <WrapedComponent {...this.props} {...newProps} />;
-    }
-  }
-  return connect(mapStateToProps, mapDispatchToProps)(AsyncComponent);
-};
+    }),
+    lifecycle({
+      componentWillMount() {
+        const {
+          numAuto,
+          selected_order,
+          selectedAction,
+          getEditOrder,
+          changeOrderType
+        } = this.props;
+
+        if (selectedAction !== "3" && !numAuto.length) history.push("/");
+        else if (selectedAction === "3") {
+          getEditOrder(`getorderedit=${selected_order}&`);
+          changeOrderType("edit");
+        }
+      }
+    })
+  )(props => <FinalPage {...props} />);
+
 export default finalPageHOC;

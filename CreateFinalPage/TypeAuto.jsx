@@ -1,4 +1,6 @@
 import React from "react";
+import PropTypes from "prop-types";
+import { pure } from "recompose";
 
 import block from "bem-cn";
 const b = block("create-final-page");
@@ -11,19 +13,24 @@ import Type4 from "../SelectTypeAuto/typeauto/14_n.svg";
 
 const typeAutoSvg = { 1: Type1, 2: Type2, 3: Type3, 4: Type4 };
 
-export default function RenderTypeAuto({ typeAuto, change_place }) {
+export function TypeAuto({ typeAuto, changePlace }) {
   const TypeAuto = typeAuto ? typeAutoSvg[typeAuto] : null;
   return !typeAuto ? (
     <button
-      onClick={() => change_place("/selecttypeauto")}
-      className={b("button", { toservices: true, green: true })}
+      onClick={() => changePlace("/selecttypeauto")}
+      className={b("button", { toservices: true, green: true })()}
     >
       Выбрать тип авто
     </button>
   ) : (
     <TypeAuto
-      onClick={() => change_place("/selecttypeauto")}
-      className={b("button", { typeauto: true, selected: true })}
+      onClick={() => changePlace("/selecttypeauto")}
+      className={b("button", { typeauto: true, selected: true })()}
     />
   );
 }
+TypeAuto.propTypes = {
+  typeAuto: PropTypes.number,
+  changePlace: PropTypes.func.isRequired
+};
+export default pure(TypeAuto);
